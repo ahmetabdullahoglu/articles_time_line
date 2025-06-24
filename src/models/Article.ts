@@ -246,6 +246,9 @@ const flagsSchema = new Schema({
   },
 }, { _id: false });
 
+// في ملف src/models/Article.ts
+// استبدل هذا الجزء من الكود:
+
 /**
  * Main Article schema
  */
@@ -253,7 +256,7 @@ const articleSchema = new Schema<IArticleDocument>({
   url: {
     type: String,
     required: [true, 'Article URL is required'],
-    unique: true,
+    unique: true, // Remove this line - we'll use schema.index() instead
     trim: true,
     validate: {
       validator: function(url: string) {
@@ -280,12 +283,12 @@ const articleSchema = new Schema<IArticleDocument>({
   },
   publishDate: {
     type: Date,
-    index: true,
+    // Remove index: true - we'll use schema.index() instead
   },
   addedDate: {
     type: Date,
     default: Date.now,
-    index: true,
+    // Remove index: true - we'll use schema.index() instead
   },
   updatedDate: {
     type: Date,
@@ -319,7 +322,7 @@ const articleSchema = new Schema<IArticleDocument>({
     type: String,
     enum: Object.values(['pending', 'processing', 'processed', 'failed', 'archived'] as ArticleStatus[]),
     default: 'pending' as ArticleStatus,
-    index: true,
+    // Remove index: true - we'll use schema.index() instead
   },
   flags: {
     type: flagsSchema,

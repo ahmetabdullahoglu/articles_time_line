@@ -1,37 +1,4 @@
-userSchema.methods.addToken = function(this: IUserDocument, token: string, type: 'refresh' | 'reset' | 'verification', expiresIn = '30d') {
-  // Remove existing tokens of the same type
-  this.tokens = this.tokens.filter((t: any) => t.type !== type);
-
-  // Calculate expiration date
-  const expires = new Date();
-  if (expiresIn.endsWith('d')) {
-    expires.setDate(expires.getDate() + parseInt(expiresIn.slice(0, -1)));
-  } else if (expiresIn.endsWith('h')) {
-    expires.setHours(expires.getHours() + parseInt(expiresIn.slice(0, -1)));
-  } else if (expiresIn.endsWith('m')) {
-    expires.setMinutes(expires.getMinutes() + parseInt(expiresIn.slice(0, -1)));
-  }
-
-  // Add new token
-  this.tokens.push({ token, type, expires });
-  
-  return this.save();
-};
-
-userSchema.methods.removeToken = function(this: IUserDocument, token: string) {
-  this.tokens = this.tokens.filter((t: any) => t.token !== token);
-  return this.save();
-};
-
-userSchema.methods.incrementArticleCount = function(this: IUserDocument) {
-  this.stats.articlesAdded += 1;
-  return this.save();
-};
-
-userSchema.methods.updateLastLogin = function(this: IUserDocument) {
-  this.stats.lastLogin = new Date();
-  return this.save();
-};import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { IUser, UserRole } from '../types/index';
@@ -319,9 +286,8 @@ userSchema.methods.generateAuthToken = function(this: IUserDocument): string {
     role: this.role,
   };
 
-  const jwtExpire = process.env.JWT_EXPIRE || '7d';
   const options: jwt.SignOptions = {
-    expiresIn: jwtExpire,
+    expiresIn: (process.env.JWT_EXPIRE || '7d') as jwt.SignOptions['expiresIn'],
     issuer: 'article-archiver',
     audience: 'article-archiver-users',
   };
@@ -365,7 +331,7 @@ userSchema.methods.toAuthJSON = function(this: IUserDocument) {
   };
 };
 
-userSchema.methods.addToken = function(token: string, type: 'refresh' | 'reset' | 'verification', expiresIn = '30d') {
+userSchema.methods.addToken = function(this: IUserDocument, token: string, type: 'refresh' | 'reset' | 'verification', expiresIn = '30d') {
   // Remove existing tokens of the same type
   this.tokens = this.tokens.filter((t: any) => t.type !== type);
 
@@ -385,17 +351,17 @@ userSchema.methods.addToken = function(token: string, type: 'refresh' | 'reset' 
   return this.save();
 };
 
-userSchema.methods.removeToken = function(token: string) {
+userSchema.methods.removeToken = function(this: IUserDocument, token: string) {
   this.tokens = this.tokens.filter((t: any) => t.token !== token);
   return this.save();
 };
 
-userSchema.methods.incrementArticleCount = function() {
+userSchema.methods.incrementArticleCount = function(this: IUserDocument) {
   this.stats.articlesAdded += 1;
   return this.save();
 };
 
-userSchema.methods.updateLastLogin = function() {
+userSchema.methods.updateLastLogin = function(this: IUserDocument) {
   this.stats.lastLogin = new Date();
   return this.save();
 };
