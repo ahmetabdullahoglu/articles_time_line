@@ -1,4 +1,4 @@
-import express, { Application, Request, Response, NextFunction } from 'express';
+import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -90,7 +90,7 @@ class App {
    */
   private setupRoutes(): void {
     // Health check endpoint
-    this.app.get('/health', (req: Request, res: Response) => {
+    this.app.get('/health', (_req: Request, res: Response) => {
       res.status(200).json({
         status: 'success',
         message: 'Article Archiver API is running',
@@ -105,7 +105,7 @@ class App {
     // this.app.use('/api/v1/categories', categoryRoutes);
 
     // API documentation endpoint
-    this.app.get('/api', (req: Request, res: Response) => {
+    this.app.get('/api', (_req: Request, res: Response) => {
       res.status(200).json({
         message: 'Article Archiver API',
         version: '1.0.0',

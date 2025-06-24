@@ -1,5 +1,6 @@
 /**
- * Common TypeScript interfaces and types for the Article Archiver application
+ * Enhanced TypeScript interfaces and types for the Article Archiver application
+ * Updated to match the database models
  */
 
 // =================================
@@ -119,6 +120,8 @@ export interface IArticle {
   flags: IArticleFlags;
   createdBy?: string;
   updatedBy?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // =================================
@@ -243,6 +246,40 @@ export interface ArticleQueryParams {
   source?: string;
 }
 
+export interface CreateCategoryRequest {
+  name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  parentId?: string;
+}
+
+export interface UpdateCategoryRequest {
+  name?: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  parentId?: string;
+}
+
+export interface CreateUserRequest {
+  username: string;
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export interface LoginRequest {
+  identifier: string; // email or username
+  password: string;
+}
+
+export interface UpdateUserRequest {
+  profile?: Partial<IUserProfile>;
+  preferences?: Partial<IUserPreferences>;
+}
+
 // =================================
 // Validation Types
 // =================================
@@ -270,6 +307,16 @@ export interface DatabaseConfig {
     socketTimeoutMS?: number;
     bufferMaxEntries?: number;
   };
+}
+
+export interface DatabaseStats {
+  host: string;
+  port: number;
+  database: string;
+  readyState: number;
+  collections: any[];
+  version: string;
+  uptime: number;
 }
 
 // =================================
@@ -338,10 +385,88 @@ export interface EnvironmentConfig {
   NODE_ENV: 'development' | 'production' | 'test';
   PORT: number;
   MONGODB_URI: string;
+  MONGODB_TEST_URI?: string;
   JWT_SECRET: string;
   JWT_EXPIRE: string;
+  JWT_REFRESH_SECRET?: string;
   CORS_ORIGIN: string;
   BCRYPT_SALT_ROUNDS: number;
   RATE_LIMIT_WINDOW_MS: number;
   RATE_LIMIT_MAX_REQUESTS: number;
+}
+
+// =================================
+// Model Static Methods Types
+// =================================
+
+export interface ArticleStatics {
+  findByUrl(url: string): Promise<IArticle | null>;
+  findByCategory(categoryId: string): Promise<IArticle[]>;
+  findPublished(): Promise<IArticle[]>;
+  getStats(): Promise<{
+    total: number;
+    processed: number;
+    pending: number;
+    failed: number;
+    avgWordCount: number;
+    avgReadingTime: number;
+  }>;
+}
+
+export interface CategoryStatics {
+  findBySlug(slug: string): Promise<ICategory | null>;
+  findHierarchy(): Promise<any[]>;
+  getTopCategories(): Promise<ICategory[]>;
+  updateStats(categoryId: string): Promise<void>;
+}
+
+export interface UserStatics {
+  findByEmail(email: string): Promise<IUser | null>;
+  findByUsername(username: string): Promise<IUser | null>;
+  findByCredentials(identifier: string, password: string): Promise<IUser | null>;
+  getActiveUsers(): Promise<IUser[]>;
+}
+
+// =================================
+// Authentication Types
+// =================================
+
+export interface AuthTokenPayload {
+  id: string;
+  username: string;
+  email: string;
+  role: UserRole;
+  iat: number;
+  exp: number;
+  iss: string;
+  aud: string;
+}
+
+export interface RefreshTokenPayload {
+  id: string;
+  type: 'refresh';
+  iat: number;
+  exp: number;
+  iss: string;
+  aud: string;
+}
+
+export interface AuthenticatedUser {
+  id: string;
+  username: string;
+  email: string;
+  role: UserRole;
+  permissions: string[];
+}
+
+// =================================
+// Express Request Extensions
+// =================================
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: AuthenticatedUser;
+    }
+  }
 }

@@ -14,7 +14,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "db:seed": "ts-node -r tsconfig-paths/register scripts/seed.ts",
+    "db:migrate": "ts-node -r tsconfig-paths/register scripts/migrate.ts"
   },
   "keywords": [
     "article",
